@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_module_boilerplate/core/constants/network.dart';
-import 'package:flutter_module_boilerplate/core/di/di.config.dart';
-import 'package:flutter_module_boilerplate/core/env/env.dart';
-import 'package:flutter_module_boilerplate/data/network/interceptor/common_interceptor.dart';
-import 'package:flutter_module_boilerplate/data/network/rest_client.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/constants/network.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/di/di.config.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/env/env.dart';
+import 'package:flutter_clean_architecture_boilerplate/data/network/interceptor/common_interceptor.dart';
+import 'package:flutter_clean_architecture_boilerplate/data/network/rest_client.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
@@ -27,8 +27,8 @@ Future<void> setupLocator(Env env) async {
     }
     ..followRedirects = false;
 
-  getIt.registerSingleton(() => Dio());
+  getIt.registerSingleton(() => dio);
 
-  getIt.registerSingleton(() => RestClient(getIt<Dio>(), baseUrl: env.apiUrl));
+  getIt.registerSingleton(() => RestClient(dio, baseUrl: env.apiUrl));
   $initGetIt(getIt);
 }

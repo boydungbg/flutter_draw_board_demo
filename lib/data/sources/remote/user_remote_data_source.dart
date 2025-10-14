@@ -1,5 +1,5 @@
-import 'package:flutter_module_boilerplate/data/models/index.dart';
-import 'package:flutter_module_boilerplate/data/network/rest_client.dart';
+import 'package:flutter_clean_architecture_boilerplate/data/models/index.dart';
+import 'package:flutter_clean_architecture_boilerplate/data/network/rest_client.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class UserRemoteDataSource {

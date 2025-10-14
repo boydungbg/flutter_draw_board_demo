@@ -1,7 +1,7 @@
-import 'package:flutter_module_boilerplate/core/exceptions/base_exception.dart';
-import 'package:flutter_module_boilerplate/domain/entities/index.dart';
-import 'package:flutter_module_boilerplate/domain/repositories/index.dart';
-import 'package:flutter_module_boilerplate/domain/usecase/usecase.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/exceptions/base_exception.dart';
+import 'package:flutter_clean_architecture_boilerplate/domain/entities/index.dart';
+import 'package:flutter_clean_architecture_boilerplate/domain/repositories/index.dart';
+import 'package:flutter_clean_architecture_boilerplate/domain/usecase/usecase.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 

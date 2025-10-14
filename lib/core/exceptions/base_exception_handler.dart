@@ -1,4 +1,4 @@
-import 'package:flutter_module_boilerplate/core/exceptions/base_exception.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/exceptions/base_exception.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class BaseExceptionHandler {

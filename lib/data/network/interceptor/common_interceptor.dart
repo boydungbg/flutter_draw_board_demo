@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_module_boilerplate/core/constants/http_code.dart';
-import 'package:flutter_module_boilerplate/core/exceptions/base_exception.dart';
-import 'package:flutter_module_boilerplate/core/exceptions/errors/error_response.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/constants/http_code.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/exceptions/base_exception.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/exceptions/errors/error_response.dart';
 
 class CommonInterceptor extends InterceptorsWrapper {
   CommonInterceptor();

@@ -1,5 +1,5 @@
-name: flutter_module_boilerplate
-description: "A new Flutter module project."
+name: flutter_clean_architecture_boilerplate
+description: "A Flutter clean architecture boilerplate with responsive design."
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -11,10 +11,6 @@ description: "A new Flutter module project."
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-#
-# This version is used _only_ for the Runner app, which is used if you just do
-# a `flutter run` or a `flutter make-host-app-editable`. It has no impact
-# on any other native host app that you embed your Flutter project into.
 version: 1.0.0+1
 
 environment:
@@ -40,7 +36,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   build_runner: ^2.6.0
   freezed: ^3.2.0
   json_serializable: ^6.10.0
@@ -61,9 +57,7 @@ flutter:
   # To add Flutter specific assets to your application, add an assets section,
   # like this:
   assets:
-    - assets/images/
     - assets/icons/
-    - assets/fonts/
     - assets/translations/
 
 
@@ -92,29 +86,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-
-  # This section identifies your Flutter project as a module meant for
-  # embedding in a native host app.  These identifiers should _not_ ordinarily
-  # be changed after generation - they are used to ensure that the tooling can
-  # maintain consistency when adding or modifying assets and plugins.
-  # They also do not have any bearing on your native host application's
-  # identifiers, which may be completely independent or the same as these.
-
-  # The androidX and androidPackage identifiers are used to generate the
-  # AndroidManifest.xml and MainActivity.java files in the android module.
-  # The iosBundleIdentifier is used to generate the Info.plist file in the iOS
-  # module.  These identifiers are used to ensure that the generated files
-  # are consistent with the identifiers used in your native host app.
-  # If you are embedding this module in a native host app, you should not
-  # change these identifiers. If you are creating a new native host app,
-  # you should set these identifiers to match the identifiers used in your
-  # native host app. If you are creating a new Flutter module, you should
-  # set these identifiers to match the identifiers used in your native host app.
-  # module:
-  #   androidX: true
-  #   androidPackage: com.example.flutter_module_boilerplate
-  #   iosBundleIdentifier: com.example.flutterModuleBoilerplate
 
 
 flutter_gen:

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_module_boilerplate/data/models/index.dart';
+import 'package:flutter_clean_architecture_boilerplate/data/models/index.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'rest_client.g.dart';

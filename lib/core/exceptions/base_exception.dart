@@ -1,4 +1,4 @@
-import 'package:flutter_module_boilerplate/core/exceptions/errors/error_response.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/exceptions/errors/error_response.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'base_exception.freezed.dart';

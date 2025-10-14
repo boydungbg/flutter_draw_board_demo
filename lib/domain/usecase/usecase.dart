@@ -1,6 +1,6 @@
-import 'package:flutter_module_boilerplate/core/di/di.dart';
-import 'package:flutter_module_boilerplate/core/exceptions/base_exception.dart';
-import 'package:flutter_module_boilerplate/core/exceptions/base_exception_handler.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/di/di.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/exceptions/base_exception.dart';
+import 'package:flutter_clean_architecture_boilerplate/core/exceptions/base_exception_handler.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract class UseCase<Type, Params> {

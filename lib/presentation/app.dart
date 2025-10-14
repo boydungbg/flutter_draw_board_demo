@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_module_boilerplate/presentation/routes/routes.dart';
-import 'package:flutter_module_boilerplate/presentation/theme/system_theme.dart';
+import 'package:flutter_clean_architecture_boilerplate/presentation/routes/routes.dart';
+import 'package:flutter_clean_architecture_boilerplate/presentation/theme/system_theme.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
