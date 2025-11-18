@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+// import 'dart:typed_data';
+// import 'dart:ui' as ui;
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+// import 'package:printing/printing.dart';
 import 'dash_painter.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+import 'dart:math' as math;
 
-enum DrawingTool {
-  pen,
-  line,
-  rectangle,
-  circle,
-  ellipse,
-  text,
-  select,
-}
+enum DrawingTool { pen, line, rectangle, circle, ellipse, text, select }
 
 class WhiteboardWidget extends StatefulWidget {
   final Function(bool)? onOverlayModeChanged;
-  
-  const WhiteboardWidget({
-    super.key,
-    this.onOverlayModeChanged,
-  });
+
+  const WhiteboardWidget({super.key, this.onOverlayModeChanged});
 
   @override
   State<WhiteboardWidget> createState() => _WhiteboardWidgetState();
@@ -33,14 +31,14 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
   bool isFilled = false;
   bool isOverlayMode = false;
   GlobalKey paintKey = GlobalKey();
-  
+
   // Selection variables
   List<DrawingObject> selectedObjects = [];
   Rect? selectionRect;
   Offset? selectionStart;
   bool isDragging = false;
   Offset? dragOffset;
-  
+
   // Text editing
   TextEditingController textController = TextEditingController();
   bool isEditingText = false;
@@ -51,13 +49,8 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
     if (isOverlayMode) {
       return _buildOverlayMode();
     }
-    
-    return Column(
-      children: [
-        _buildToolbar(),
-        _buildDrawingArea(),
-      ],
-    );
+
+    return Column(children: [_buildToolbar(), _buildDrawingArea()]);
   }
 
   Widget _buildOverlayMode() {
@@ -86,31 +79,35 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
                   icon: const Icon(Icons.fullscreen_exit, color: Colors.white),
                   tooltip: 'Exit Overlay Mode',
                 ),
-                
+
                 const VerticalDivider(color: Colors.white24),
-                
+
                 // Essential tools
                 _buildCompactToolButton(DrawingTool.pen, Icons.edit, 'Pen'),
-                _buildCompactToolButton(DrawingTool.select, Icons.open_with, 'Select'),
-                
-                const VerticalDivider(color: Colors.white24),
-                
-                // Quick colors
-                ...Colors.primaries.take(4).map((color) => 
-                  _buildCompactColorButton(color),
+                _buildCompactToolButton(
+                  DrawingTool.select,
+                  Icons.open_with,
+                  'Select',
                 ),
-                
+
                 const VerticalDivider(color: Colors.white24),
-                
+
+                // Quick colors
+                ...Colors.primaries
+                    .take(4)
+                    .map((color) => _buildCompactColorButton(color)),
+
+                const VerticalDivider(color: Colors.white24),
+
                 // Clear button
                 IconButton(
                   onPressed: _clearAll,
                   icon: const Icon(Icons.clear_all, color: Colors.white),
                   tooltip: 'Clear All',
                 ),
-                
+
                 const VerticalDivider(color: Colors.white24),
-                
+
                 // System tray indicator
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -121,10 +118,7 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
                       SizedBox(width: 4),
                       Text(
                         'In Tray',
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 10,
-                        ),
+                        style: TextStyle(color: Colors.white54, fontSize: 10),
                       ),
                     ],
                   ),
@@ -132,7 +126,7 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
               ],
             ),
           ),
-          
+
           // Transparent drawing area
           Expanded(
             child: Container(
@@ -178,34 +172,46 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
             // Drawing tools
             _buildToolButton(DrawingTool.pen, Icons.edit, 'Pen'),
             _buildToolButton(DrawingTool.line, Icons.remove, 'Line'),
-            _buildToolButton(DrawingTool.rectangle, Icons.crop_square, 'Rectangle'),
-            _buildToolButton(DrawingTool.circle, Icons.radio_button_unchecked, 'Circle'),
-            _buildToolButton(DrawingTool.ellipse, Icons.panorama_fish_eye, 'Ellipse'),
+            _buildToolButton(
+              DrawingTool.rectangle,
+              Icons.crop_square,
+              'Rectangle',
+            ),
+            _buildToolButton(
+              DrawingTool.circle,
+              Icons.radio_button_unchecked,
+              'Circle',
+            ),
+            _buildToolButton(
+              DrawingTool.ellipse,
+              Icons.panorama_fish_eye,
+              'Ellipse',
+            ),
             _buildToolButton(DrawingTool.text, Icons.text_fields, 'Text'),
             _buildToolButton(DrawingTool.select, Icons.open_with, 'Select'),
-            
+
             const VerticalDivider(),
-            
+
             // Color picker for stroke
             const Text('Stroke: '),
-            ...Colors.primaries.take(6).map((color) => 
-              _buildColorButton(color, false),
-            ),
+            ...Colors.primaries
+                .take(6)
+                .map((color) => _buildColorButton(color, false)),
             _buildColorButton(Colors.black, false),
-            
+
             const SizedBox(width: 10),
-            
+
             // Fill toggle and color
             Checkbox(
               value: isFilled,
               onChanged: (value) => setState(() => isFilled = value ?? false),
             ),
             Text(selectedTool == DrawingTool.select ? 'Paint: ' : 'Fill: '),
-            ...Colors.primaries.take(6).map((color) => 
-              _buildColorButton(color, true),
-            ),
+            ...Colors.primaries
+                .take(6)
+                .map((color) => _buildColorButton(color, true)),
             _buildColorButton(Colors.white, true),
-            
+
             // Fill mode indicator for Select tool
             if (selectedTool == DrawingTool.select && isFilled)
               Container(
@@ -217,12 +223,16 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
                 ),
                 child: const Text(
                   'Paint Mode',
-                  style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            
+
             const SizedBox(width: 10),
-            
+
             // Brush size
             Text('Size: ${selectedWidth.toInt()}'),
             SizedBox(
@@ -235,9 +245,21 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
                 onChanged: (value) => setState(() => selectedWidth = value),
               ),
             ),
-            
+
             const VerticalDivider(),
-            
+
+            // Export PDF button
+            ElevatedButton.icon(
+              onPressed: _exportToPdf,
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Export PDF'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 8),
+
             // Overlay mode button
             ElevatedButton.icon(
               onPressed: () {
@@ -252,7 +274,6 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
               ),
             ),
             const SizedBox(width: 8),
-            
             // Clear and Delete buttons
             ElevatedButton(
               onPressed: _clearAll,
@@ -264,7 +285,7 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
               child: const Text('Delete Selected'),
             ),
             const SizedBox(width: 8),
-            
+
             // System tray info
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -290,6 +311,174 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> _exportToPdf() async {
+    {
+      // 4K target size
+      const double targetWidth = 3840.0;
+      const double targetHeight = 2160.0;
+      // Get current whiteboard size
+      final renderBox =
+          paintKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Whiteboard size unavailable.')),
+        );
+        return;
+      }
+      final Size whiteboardSize = renderBox.size;
+      final double scaleX = targetWidth / whiteboardSize.width;
+      final double scaleY = targetHeight / whiteboardSize.height;
+      // Use uniform scale to preserve aspect ratio
+      final double scaleValue = scaleX < scaleY ? scaleX : scaleY;
+
+      final pdf = pw.Document();
+      final pageFormat = PdfPageFormat(targetWidth, targetHeight);
+      pdf.addPage(
+        pw.Page(
+          pageFormat: pageFormat,
+          margin: pw.EdgeInsets.all(0),
+          build: (pw.Context context) {
+            final double scale = scaleValue;
+            // Helper to rotate a point 90deg CCW (landscape)
+            Offset rotatePoint(Offset p) {
+              return Offset(p.dx * scale, p.dy * scale);
+            }
+
+            final canvas = context.canvas;
+            for (final obj in objects) {
+              if (obj is DrawnLine) {
+                if (obj.path.length < 2) continue;
+                final pdfColor = PdfColor.fromInt(obj.color.value);
+                canvas.setStrokeColor(pdfColor);
+                canvas.setLineWidth(obj.width * scale);
+                final points = obj.path
+                    .map(
+                      (p) =>
+                          Offset(p.dx * scale, targetHeight - (p.dy * scale)),
+                    )
+                    .toList();
+                canvas.moveTo(points.first.dx, points.first.dy);
+                for (int i = 1; i < points.length; i++) {
+                  canvas.lineTo(points[i].dx, points[i].dy);
+                }
+                canvas.strokePath();
+              } else if (obj is DrawnShape) {
+                final start = rotatePoint(obj.startPoint);
+                final end = rotatePoint(obj.endPoint);
+                final left = math.min(start.dx, end.dx);
+                final right = math.max(start.dx, end.dx);
+                final top = math.min(start.dy, end.dy);
+                final bottom = math.max(start.dy, end.dy);
+                final w = right - left;
+                final h = bottom - top;
+                final color = PdfColor.fromInt(obj.color.value);
+                final fillColor =
+                    obj.isFilled && obj.fillColor != Colors.transparent
+                    ? PdfColor.fromInt(obj.fillColor.value)
+                    : null;
+                canvas.setLineWidth(obj.width * scale);
+                canvas.setStrokeColor(color);
+                switch (obj.type) {
+                  case ShapeType.rectangle:
+                    if (fillColor != null) {
+                      canvas.setFillColor(fillColor);
+                      canvas.drawRect(left, top, w, h);
+                      canvas.fillPath();
+                    }
+                    canvas.drawRect(left, top, w, h);
+                    canvas.strokePath();
+                    break;
+                  case ShapeType.circle:
+                    final cx = (left + right) / 2;
+                    final cy = (top + bottom) / 2;
+                    final r = (w > h ? h : w) / 2;
+                    if (fillColor != null) {
+                      canvas.setFillColor(fillColor);
+                      canvas.drawEllipse(cx, cy, r, r);
+                      canvas.fillPath();
+                    }
+                    canvas.drawEllipse(cx, cy, r, r);
+                    canvas.strokePath();
+                    break;
+                  case ShapeType.ellipse:
+                    final cx = (left + right) / 2;
+                    final cy = (top + bottom) / 2;
+                    if (fillColor != null) {
+                      canvas.setFillColor(fillColor);
+                      canvas.drawEllipse(cx, cy, w / 2, h / 2);
+                      canvas.fillPath();
+                    }
+                    canvas.drawEllipse(cx, cy, w / 2, h / 2);
+                    canvas.strokePath();
+                    break;
+                  case ShapeType.line:
+                    canvas.moveTo(start.dx, start.dy);
+                    canvas.lineTo(end.dx, end.dy);
+                    canvas.strokePath();
+                    break;
+                }
+              }
+            }
+            // Return text widgets as overlay, rotated
+            return pw.FullPage(
+              ignoreMargins: true,
+              child: pw.Stack(
+                children: [
+                  ...objects.whereType<DrawnText>().map((obj) {
+                    final pos = rotatePoint(obj.position);
+                    return pw.Positioned(
+                      left: pos.dx,
+                      top: pos.dy,
+                      child: pw.Text(
+                        obj.text,
+                        style: pw.TextStyle(
+                          color: PdfColor.fromInt(obj.color.value),
+                          fontSize: obj.fontSize * scale,
+                          font: pw.Font.helvetica(),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+      await saveFile(
+        bytes: await pdf.save(),
+        fileName: 'whiteboard_export',
+        fileExtension: 'pdf',
+      );
+    }
+  }
+
+  Future<String?> saveFile({
+    required List<int> bytes,
+    String? fileName,
+    String? fileExtension,
+  }) async {
+    String? outputPath;
+    try {
+      String? path = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save File',
+        fileName: fileName,
+        type: FileType.custom,
+        allowedExtensions: fileExtension != null ? [fileExtension] : null,
+      );
+      if (path != null) {
+        final file = File(path);
+        await file.writeAsBytes(bytes, flush: true);
+        outputPath = path;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save file: $e')));
+    }
+    return outputPath;
   }
 
   Widget _buildDrawingArea() {
@@ -320,7 +509,7 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
               ),
             ),
           ),
-          
+
           // Text editing overlay
           if (isEditingText && textPosition != null)
             Positioned(
@@ -364,14 +553,20 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
           icon: Icon(icon),
           color: selectedTool == tool ? Colors.blue : Colors.black,
           style: IconButton.styleFrom(
-            backgroundColor: selectedTool == tool ? Colors.blue.withOpacity(0.2) : null,
+            backgroundColor: selectedTool == tool
+                ? Colors.blue.withOpacity(0.2)
+                : null,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCompactToolButton(DrawingTool tool, IconData icon, String tooltip) {
+  Widget _buildCompactToolButton(
+    DrawingTool tool,
+    IconData icon,
+    String tooltip,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.0),
       child: Tooltip(
@@ -385,7 +580,9 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
           icon: Icon(icon, size: 18),
           color: selectedTool == tool ? Colors.orange : Colors.white,
           style: IconButton.styleFrom(
-            backgroundColor: selectedTool == tool ? Colors.orange.withOpacity(0.3) : null,
+            backgroundColor: selectedTool == tool
+                ? Colors.orange.withOpacity(0.3)
+                : null,
             minimumSize: const Size(30, 30),
           ),
         ),
@@ -409,7 +606,7 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
         height: 24,
         decoration: BoxDecoration(
           color: color,
-          border: currentColor == color 
+          border: currentColor == color
               ? Border.all(color: Colors.black, width: 2)
               : Border.all(color: Colors.grey, width: 1),
           borderRadius: BorderRadius.circular(12),
@@ -427,7 +624,7 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
         height: 20,
         decoration: BoxDecoration(
           color: color,
-          border: selectedColor == color 
+          border: selectedColor == color
               ? Border.all(color: Colors.white, width: 2)
               : Border.all(color: Colors.white54, width: 1),
           borderRadius: BorderRadius.circular(10),
@@ -438,7 +635,8 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
 
   void _onTapDown(TapDownDetails details) {
     if (selectedTool == DrawingTool.text) {
-      final renderBox = paintKey.currentContext?.findRenderObject() as RenderBox?;
+      final renderBox =
+          paintKey.currentContext?.findRenderObject() as RenderBox?;
       if (renderBox != null) {
         final localPosition = renderBox.globalToLocal(details.globalPosition);
         setState(() {
@@ -449,7 +647,8 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
       }
     } else if (selectedTool == DrawingTool.select && isFilled) {
       // Fill mode in select tool - fill clicked object
-      final renderBox = paintKey.currentContext?.findRenderObject() as RenderBox?;
+      final renderBox =
+          paintKey.currentContext?.findRenderObject() as RenderBox?;
       if (renderBox != null) {
         final localPosition = renderBox.globalToLocal(details.globalPosition);
         final clickedObject = _findObjectAtPoint(localPosition);
@@ -469,14 +668,14 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
     if (selectedTool == DrawingTool.select) {
       // Check if we're clicking on an existing object
       final clickedObject = _findObjectAtPoint(localPosition);
-      
+
       if (clickedObject != null) {
         // If fill mode is enabled, fill the object instead of selecting
         if (isFilled) {
           _fillObject(clickedObject);
           return;
         }
-        
+
         // Normal selection behavior
         if (!selectedObjects.contains(clickedObject)) {
           selectedObjects.clear();
@@ -494,7 +693,7 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
       // Create new drawing object
       selectedObjects.clear();
       selectionRect = null;
-      
+
       switch (selectedTool) {
         case DrawingTool.pen:
           currentObject = DrawnLine(
@@ -681,12 +880,12 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
           width: object.width,
           isFilled: true,
         );
-        
+
         // Replace the old object with the new one
         final index = objects.indexOf(object);
         if (index != -1) {
           objects[index] = newShape;
-          
+
           // Update selection if this object was selected
           final selectionIndex = selectedObjects.indexOf(object);
           if (selectionIndex != -1) {
@@ -701,11 +900,11 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
           color: fillColor,
           fontSize: object.fontSize,
         );
-        
+
         final index = objects.indexOf(object);
         if (index != -1) {
           objects[index] = newText;
-          
+
           final selectionIndex = selectedObjects.indexOf(object);
           if (selectionIndex != -1) {
             selectedObjects[selectionIndex] = newText;
@@ -718,11 +917,11 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
           color: fillColor,
           width: object.width,
         );
-        
+
         final index = objects.indexOf(object);
         if (index != -1) {
           objects[index] = newLine;
-          
+
           final selectionIndex = selectedObjects.indexOf(object);
           if (selectionIndex != -1) {
             selectedObjects[selectionIndex] = newLine;
@@ -747,11 +946,7 @@ class DrawnLine extends DrawingObject {
   final Color color;
   final double width;
 
-  DrawnLine({
-    required this.path,
-    required this.color,
-    required this.width,
-  });
+  DrawnLine({required this.path, required this.color, required this.width});
 
   @override
   void move(Offset delta) {
@@ -797,13 +992,19 @@ class DrawnLine extends DrawingObject {
     }
   }
 
-  double _distanceToLineSegment(Offset point, Offset lineStart, Offset lineEnd) {
+  double _distanceToLineSegment(
+    Offset point,
+    Offset lineStart,
+    Offset lineEnd,
+  ) {
     final lineLength = (lineEnd - lineStart).distance;
     if (lineLength == 0) return (point - lineStart).distance;
 
-    final t = ((point - lineStart).dx * (lineEnd - lineStart).dx + 
-               (point - lineStart).dy * (lineEnd - lineStart).dy) / (lineLength * lineLength);
-    
+    final t =
+        ((point - lineStart).dx * (lineEnd - lineStart).dx +
+            (point - lineStart).dy * (lineEnd - lineStart).dy) /
+        (lineLength * lineLength);
+
     final clampedT = t.clamp(0.0, 1.0);
     final projection = lineStart + (lineEnd - lineStart) * clampedT;
     return (point - projection).distance;
@@ -919,13 +1120,19 @@ class DrawnShape extends DrawingObject {
     }
   }
 
-  double _distanceToLineSegment(Offset point, Offset lineStart, Offset lineEnd) {
+  double _distanceToLineSegment(
+    Offset point,
+    Offset lineStart,
+    Offset lineEnd,
+  ) {
     final lineLength = (lineEnd - lineStart).distance;
     if (lineLength == 0) return (point - lineStart).distance;
 
-    final t = ((point - lineStart).dx * (lineEnd - lineStart).dx + 
-               (point - lineStart).dy * (lineEnd - lineStart).dy) / (lineLength * lineLength);
-    
+    final t =
+        ((point - lineStart).dx * (lineEnd - lineStart).dx +
+            (point - lineStart).dy * (lineEnd - lineStart).dy) /
+        (lineLength * lineLength);
+
     final clampedT = t.clamp(0.0, 1.0);
     final projection = lineStart + (lineEnd - lineStart) * clampedT;
     return (point - projection).distance;
@@ -956,7 +1163,12 @@ class DrawnText extends DrawingObject {
     // Approximate text bounds
     final textWidth = text.length * fontSize * 0.6;
     final textHeight = fontSize;
-    final rect = Rect.fromLTWH(position.dx, position.dy - textHeight, textWidth, textHeight);
+    final rect = Rect.fromLTWH(
+      position.dx,
+      position.dy - textHeight,
+      textWidth,
+      textHeight,
+    );
     return rect.contains(point);
   }
 
@@ -964,7 +1176,12 @@ class DrawnText extends DrawingObject {
   bool intersects(Rect rect) {
     final textWidth = text.length * fontSize * 0.6;
     final textHeight = fontSize;
-    final textRect = Rect.fromLTWH(position.dx, position.dy - textHeight, textWidth, textHeight);
+    final textRect = Rect.fromLTWH(
+      position.dx,
+      position.dy - textHeight,
+      textWidth,
+      textHeight,
+    );
     return rect.overlaps(textRect);
   }
 
@@ -973,11 +1190,7 @@ class DrawnText extends DrawingObject {
     final textPainter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(
-          color: color,
-          fontSize: fontSize,
-          fontFamily: 'Arial',
-        ),
+        style: TextStyle(color: color, fontSize: fontSize, fontFamily: 'Arial'),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -1028,14 +1241,14 @@ class WhiteboardPainter extends CustomPainter {
 
   void _drawSelectionBounds(Canvas canvas, DrawingObject obj, Paint paint) {
     Rect bounds;
-    
+
     if (obj is DrawnLine) {
       if (obj.path.isEmpty) return;
       double minX = obj.path.first.dx;
       double maxX = obj.path.first.dx;
       double minY = obj.path.first.dy;
       double maxY = obj.path.first.dy;
-      
+
       for (final point in obj.path) {
         minX = minX < point.dx ? minX : point.dx;
         maxX = maxX > point.dx ? maxX : point.dx;
@@ -1048,11 +1261,16 @@ class WhiteboardPainter extends CustomPainter {
     } else if (obj is DrawnText) {
       final textWidth = obj.text.length * obj.fontSize * 0.6;
       final textHeight = obj.fontSize;
-      bounds = Rect.fromLTWH(obj.position.dx - 5, obj.position.dy - textHeight - 5, textWidth + 10, textHeight + 10);
+      bounds = Rect.fromLTWH(
+        obj.position.dx - 5,
+        obj.position.dy - textHeight - 5,
+        textWidth + 10,
+        textHeight + 10,
+      );
     } else {
       return;
     }
-    
+
     DashPainter.drawDashedRect(canvas, bounds, paint);
   }
 
