@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 // import 'dart:typed_data';
 // import 'dart:ui' as ui;
+import 'package:flutter_clean_architecture_boilerplate/core/extensions/responsive_extension.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 // import 'package:printing/printing.dart';
@@ -50,7 +50,17 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
       return _buildOverlayMode();
     }
 
-    return Column(children: [_buildToolbar(), _buildDrawingArea()]);
+    if (context.isDesktop) {
+      return Row(
+        children: [
+          _buildDesktopToolbar(),
+          const VerticalDivider(width: 1, thickness: 1),
+          _buildDrawingArea(),
+        ],
+      );
+    }
+
+    return Column(children: [_buildTopToolbar(), _buildDrawingArea()]);
   }
 
   Widget _buildOverlayMode() {
@@ -158,9 +168,12 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
     );
   }
 
-  Widget _buildToolbar() {
+  Widget _buildTopToolbar() {
+    final bool compact = context.isMobile;
+    final double toolbarHeight = compact ? 132 : 88;
+
     return Container(
-      height: 80,
+      height: toolbarHeight,
       decoration: BoxDecoration(
         color: Colors.grey[200],
         border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
@@ -170,34 +183,60 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
         child: Row(
           children: [
             // Drawing tools
-            _buildToolButton(DrawingTool.pen, Icons.edit, 'Pen'),
-            _buildToolButton(DrawingTool.line, Icons.remove, 'Line'),
+            _buildToolButton(
+              DrawingTool.pen,
+              Icons.edit,
+              'Pen',
+              compact: compact,
+            ),
+            _buildToolButton(
+              DrawingTool.line,
+              Icons.remove,
+              'Line',
+              compact: compact,
+            ),
             _buildToolButton(
               DrawingTool.rectangle,
               Icons.crop_square,
               'Rectangle',
+              compact: compact,
             ),
             _buildToolButton(
               DrawingTool.circle,
               Icons.radio_button_unchecked,
               'Circle',
+              compact: compact,
             ),
             _buildToolButton(
               DrawingTool.ellipse,
               Icons.panorama_fish_eye,
               'Ellipse',
+              compact: compact,
             ),
-            _buildToolButton(DrawingTool.text, Icons.text_fields, 'Text'),
-            _buildToolButton(DrawingTool.select, Icons.open_with, 'Select'),
+            _buildToolButton(
+              DrawingTool.text,
+              Icons.text_fields,
+              'Text',
+              compact: compact,
+            ),
+            _buildToolButton(
+              DrawingTool.select,
+              Icons.open_with,
+              'Select',
+              compact: compact,
+            ),
 
             const VerticalDivider(),
 
             // Color picker for stroke
-            const Text('Stroke: '),
+            Text('Stroke: ', style: TextStyle(fontSize: compact ? 12 : 14)),
             ...Colors.primaries
                 .take(6)
-                .map((color) => _buildColorButton(color, false)),
-            _buildColorButton(Colors.black, false),
+                .map(
+                  (color) =>
+                      _buildColorButton(color, false, size: compact ? 20 : 24),
+                ),
+            _buildColorButton(Colors.black, false, size: compact ? 20 : 24),
 
             const SizedBox(width: 10),
 
@@ -206,11 +245,17 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
               value: isFilled,
               onChanged: (value) => setState(() => isFilled = value ?? false),
             ),
-            Text(selectedTool == DrawingTool.select ? 'Paint: ' : 'Fill: '),
+            Text(
+              selectedTool == DrawingTool.select ? 'Paint: ' : 'Fill: ',
+              style: TextStyle(fontSize: compact ? 12 : 14),
+            ),
             ...Colors.primaries
                 .take(6)
-                .map((color) => _buildColorButton(color, true)),
-            _buildColorButton(Colors.white, true),
+                .map(
+                  (color) =>
+                      _buildColorButton(color, true, size: compact ? 20 : 24),
+                ),
+            _buildColorButton(Colors.white, true, size: compact ? 20 : 24),
 
             // Fill mode indicator for Select tool
             if (selectedTool == DrawingTool.select && isFilled)
@@ -234,9 +279,12 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
             const SizedBox(width: 10),
 
             // Brush size
-            Text('Size: ${selectedWidth.toInt()}'),
+            Text(
+              'Size: ${selectedWidth.toInt()}',
+              style: TextStyle(fontSize: compact ? 12 : 14),
+            ),
             SizedBox(
-              width: 100,
+              width: compact ? 72 : 100,
               child: Slider(
                 value: selectedWidth,
                 min: 1.0,
@@ -252,10 +300,14 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
             ElevatedButton.icon(
               onPressed: _exportToPdf,
               icon: const Icon(Icons.picture_as_pdf),
-              label: const Text('Export PDF'),
+              label: Text(compact ? 'Export' : 'Export PDF'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 8 : 12,
+                  vertical: compact ? 8 : 10,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -267,22 +319,26 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
                 widget.onOverlayModeChanged?.call(true);
               },
               icon: const Icon(Icons.picture_in_picture_alt),
-              label: const Text('Overlay'),
+              label: Text(compact ? 'Mode' : 'Overlay'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 8 : 12,
+                  vertical: compact ? 8 : 10,
+                ),
               ),
             ),
             const SizedBox(width: 8),
             // Clear and Delete buttons
             ElevatedButton(
               onPressed: _clearAll,
-              child: const Text('Clear All'),
+              child: Text(compact ? 'Clear' : 'Clear All'),
             ),
             const SizedBox(width: 8),
             ElevatedButton(
               onPressed: _deleteSelected,
-              child: const Text('Delete Selected'),
+              child: Text(compact ? 'Delete' : 'Delete Selected'),
             ),
             const SizedBox(width: 8),
 
@@ -310,6 +366,186 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDesktopToolbar() {
+    return Container(
+      width: context.isLargeDesktop ? 320 : 280,
+      color: Colors.grey[100],
+      child: ListView(
+        padding: const EdgeInsets.all(12),
+        children: [
+          _buildSectionTitle('Tools'),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              _buildToolButton(
+                DrawingTool.pen,
+                Icons.edit,
+                'Pen',
+                compact: true,
+              ),
+              _buildToolButton(
+                DrawingTool.line,
+                Icons.remove,
+                'Line',
+                compact: true,
+              ),
+              _buildToolButton(
+                DrawingTool.rectangle,
+                Icons.crop_square,
+                'Rectangle',
+                compact: true,
+              ),
+              _buildToolButton(
+                DrawingTool.circle,
+                Icons.radio_button_unchecked,
+                'Circle',
+                compact: true,
+              ),
+              _buildToolButton(
+                DrawingTool.ellipse,
+                Icons.panorama_fish_eye,
+                'Ellipse',
+                compact: true,
+              ),
+              _buildToolButton(
+                DrawingTool.text,
+                Icons.text_fields,
+                'Text',
+                compact: true,
+              ),
+              _buildToolButton(
+                DrawingTool.select,
+                Icons.open_with,
+                'Select',
+                compact: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildSectionTitle('Stroke'),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              ...Colors.primaries
+                  .take(6)
+                  .map((color) => _buildColorButton(color, false, size: 22)),
+              _buildColorButton(Colors.black, false, size: 22),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Checkbox(
+                value: isFilled,
+                onChanged: (value) => setState(() => isFilled = value ?? false),
+              ),
+              Text(selectedTool == DrawingTool.select ? 'Paint' : 'Fill'),
+            ],
+          ),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              ...Colors.primaries
+                  .take(6)
+                  .map((color) => _buildColorButton(color, true, size: 22)),
+              _buildColorButton(Colors.white, true, size: 22),
+            ],
+          ),
+          if (selectedTool == DrawingTool.select && isFilled)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.blue),
+                ),
+                child: const Text(
+                  'Paint Mode',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          const SizedBox(height: 12),
+          _buildSectionTitle('Brush Size: ${selectedWidth.toInt()}'),
+          Slider(
+            value: selectedWidth,
+            min: 1.0,
+            max: 20.0,
+            divisions: 19,
+            onChanged: (value) => setState(() => selectedWidth = value),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: _exportToPdf,
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Export PDF'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() => isOverlayMode = true);
+              widget.onOverlayModeChanged?.call(true);
+            },
+            icon: const Icon(Icons.picture_in_picture_alt),
+            label: const Text('Overlay'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton(onPressed: _clearAll, child: const Text('Clear All')),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: _deleteSelected,
+            child: const Text('Delete Selected'),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Close window to minimize to system tray',
+                    style: TextStyle(fontSize: 11, color: Colors.blue),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
 
@@ -539,9 +775,14 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
     );
   }
 
-  Widget _buildToolButton(DrawingTool tool, IconData icon, String tooltip) {
+  Widget _buildToolButton(
+    DrawingTool tool,
+    IconData icon,
+    String tooltip, {
+    bool compact = false,
+  }) {
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: EdgeInsets.all(compact ? 2 : 4),
       child: Tooltip(
         message: tooltip,
         child: IconButton(
@@ -550,9 +791,10 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
             selectedObjects.clear();
             selectionRect = null;
           }),
-          icon: Icon(icon),
+          icon: Icon(icon, size: compact ? 18 : 24),
           color: selectedTool == tool ? Colors.blue : Colors.black,
           style: IconButton.styleFrom(
+            minimumSize: Size.square(compact ? 34 : 44),
             backgroundColor: selectedTool == tool
                 ? Colors.blue.withOpacity(0.2)
                 : null,
@@ -590,7 +832,7 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
     );
   }
 
-  Widget _buildColorButton(Color color, bool isForFill) {
+  Widget _buildColorButton(Color color, bool isForFill, {double size = 24}) {
     final currentColor = isForFill ? fillColor : selectedColor;
     return GestureDetector(
       onTap: () => setState(() {
@@ -602,14 +844,14 @@ class _WhiteboardWidgetState extends State<WhiteboardWidget> {
       }),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 2),
-        width: 24,
-        height: 24,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: color,
           border: currentColor == color
               ? Border.all(color: Colors.black, width: 2)
               : Border.all(color: Colors.grey, width: 1),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(size / 2),
         ),
       ),
     );
